@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="Description" content="GovernmentApp">
+    <link rel="icon" type="image/png" href="favicon.png" sizes="32x32">
+
+    <base href="/" />
+  
+    <title>GovernmentApp</title>
+
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="./src/index.js"></script>
+  </head>
+  <body>
+    <ion-app>
+      <app-menu contentId="main-content"></app-menu>
+      <app-routing></app-routing>
+  
+      <ion-router-outlet id="main-content"></ion-router-outlet>
+    </ion-app>
+  </body>
+</html>

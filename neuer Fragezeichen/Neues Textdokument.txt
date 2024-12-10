@@ -1,0 +1,1 @@
+Hinweis vom 30.11.2024: Die Lösungen zu den Übungseinheiten wurden aktualisiert, sodass nun im EventsService nur noch die Ereignisse des heutigen Tages sowie die zukünftigen Ereignisse zurückgegeben werden. Beim DummyEventsService werden nun hingegen zum leichteren Testen alle Ereignisse zurückgegeben.
