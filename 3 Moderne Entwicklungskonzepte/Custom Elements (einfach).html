@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!-- saved from url=(0114)https://moodle.hof-university.de/pluginfile.php/959884/mod_folder/content/0/Custom%20Elements%20%28einfach%29.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <template id="personTemplate"></template>
+    <template id="simpleTemplate"></template>
+    <script type="text/javascript">
+        class LabelWithInput extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.createElement('label');
+            }
+
+            connectedCallback() {
+                this.render();
+                this.shadow.appendChild(this.root);
+            }
+
+            render() {
+                this.root.innerHTML = `${this.getAttribute("label")}: <input value="${this.getAttribute("value")}" />`;
+            }
+        }
+        customElements.define('label-with-input', LabelWithInput);
+
+        class PersonOutput extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.getElementById("personTemplate").content.cloneNode(true);
+            }
+
+            connectedCallback() {
+                this.shadow.appendChild(this.root);
+            }
+        }
+        customElements.define('person-output', PersonOutput);
+
+        class SimpleTemplate extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.getElementById("simpleTemplate").content.cloneNode(true);
+            }
+
+            connectedCallback() {
+                this.shadow.appendChild(this.root);
+            }
+        }
+        customElements.define('simple-output', SimpleTemplate);
+
+
+        class DataRepeater extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.createElement('div');
+            }
+
+            connectedCallback() {
+                this.render();
+                this.shadow.appendChild(this.root);
+            }
+
+            render() {
+                const data = this.getAttribute("data") || "";
+                const count = parseInt(this.getAttribute("count"));
+                this.root.innerHTML = data.repeat(count);
+            }
+
+            get count() { return parseInt(this.getAttribute("count") || 0); }
+            set count(value) { this.setAttribute("count", value); }
+        }
+        customElements.define('data-repeater', DataRepeater);
+
+        class DataRepeaterIncrementer extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.createElement('div');
+            }
+
+            connectedCallback() {
+                this.render();
+                this.shadow.appendChild(this.root);
+            }
+
+            render() {
+                this.root.innerHTML = `<button onclick="let repeater=document.getElementById('${this.getAttribute("repeaterid")}'); repeater.count++;repeater.render();">Inkrementieren</button>`;
+            }
+        }
+        customElements.define('data-repeater-incrementer', DataRepeaterIncrementer);
+    </script>
+<style type="text/css" id="tts-styles">[data-tts-block-id].tts-active {background: rgba(206, 225, 255, 0.9) !important;} [data-tts-sentence-id].tts-active {background: rgba(0, 89, 191, 0.7) !important;}</style></head>
+<body>   
+    <label-with-input label="Hello" value="World"><template shadowrootmode="closed"><label>Hello: <input value="World"></label></template></label-with-input>
+    <person-output><template shadowrootmode="closed">
+        <h1>
+            <slot name="name">Standard-Name</slot> ist <slot name="age">Standard-Alter</slot> Jahre alt! 
+        </h1>
+    </template>
+        <data slot="name">Max</data>
+        <data slot="age">21</data>
+    </person-output>
+    <simple-output><template shadowrootmode="closed">
+        <p>Content vor Slot-Inhalt</p>
+        <slot></slot>
+        <p>Content nach Slot-Inhalt</p>
+    </template>
+        <p>Beliebiger <b>HTML-Content</b></p>
+    </simple-output>
+    <data-repeater id="repeater1" data="Hello World!" count="10"><template shadowrootmode="closed"><div>Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!</div></template></data-repeater>
+    <data-repeater-incrementer repeaterid="repeater1"><template shadowrootmode="closed"><div><button onclick="let repeater=document.getElementById(&#39;repeater1&#39;); repeater.count++;repeater.render();">Inkrementieren</button></div></template></data-repeater-incrementer>
+
+</body></html>
