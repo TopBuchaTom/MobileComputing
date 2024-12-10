@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript">
+        var $ = document.querySelectorAll.bind(document);   
+
+        class Person {
+            constructor(name = "", age = "") {
+                this.id = (name && age) ? Person.counter++ : "";
+                this.name = name;
+                this.age = age;
+            }
+
+            static counter = 1;
+        }
+
+        let persons = [
+            new Person("Alex", 21),
+            new Person("Chris", 19)
+        ];
+
+        let selectedPerson = new Person();
+        
+        function updateList() {
+            $("#persons")[0].innerHTML = persons.map(person =>
+                `<li>
+                    ${person.name} - ${person.age} Jahre
+                    [<a href="#" onclick="editItem(${person.id});">Bearbeiten</a>]
+                    [<a href="#" onclick="deleteItem(${person.id})">Löschen</a>]
+                </li>`).join("");
+
+            Object.entries(selectedPerson).forEach(
+                ([key, value]) => $(`#${key}`)[0].value = value);
+
+            $("input[type='text']").forEach(
+                input => input.onchange = function() { selectedPerson[input.id] = input.value; });
+        }
+
+        function saveItem() {
+            if (!selectedPerson.id) // Neues Item?
+                persons = [...persons, new Person(selectedPerson.name, selectedPerson.age)];
+            else // Existierendes Item?
+                persons[persons.findIndex(person => person.id == selectedPerson.id)] = selectedPerson;
+           
+            selectedPerson = new Person();
+
+            updateList();
+        }
+
+        function createItem() {
+            selectedPerson = new Person();
+
+            updateList();
+        }
+
+        function editItem(id) {
+            selectedPerson = persons.find(person => person.id == id);
+
+            updateList();
+        }
+
+        function deleteItem(id) {
+            persons = persons.filter(person => person.id != id);
+            selectedPerson = new Person();
+
+            updateList();
+        }
+    </script>
+</head>
+<body onload="updateList();">   
+    <fieldset>
+        <input id="id" type="hidden" value="0" />
+        <label for="name">Name</label>: <input type="text" id="name" />
+        <label for="age">Alter</label>: <input type="text" id="age" />
+        <button onclick="saveItem();">Speichern</button>
+    </fieldset>
+    <ul id="persons"></ul>
+    <a href="#" onclick="createItem();">Neu</a>
+</body>
+</html>
