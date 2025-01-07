@@ -57,24 +57,24 @@ console.log(Animal.instanceCount); // 3
 
 /********** Aufgabe 5.2 **********/
 class Animal {  //Klasse Animal als Überklasse für Dog & Cat --> Dog & Cat erben von Animal
-  constructor(name, size) {
-      this.name = name; this.size = size;
-      Animal.instanceCount++;
-  }
+    constructor(name, size) {
+        this.name = name; this.size = size;
+        Animal.instanceCount++;
+    }
 
-  getName() { return this.name; }
+    getName() { return this.name; }
 
-  static instanceCount = 0;
+    static instanceCount = 0;
 }
 
 //          ,-> dadurch erben wir alles, was in Animal definiert ist (bekommt auch getName())
 class Dog extends Animal {      //Klasse definieren & Vererbungshierarchie aufsetzen; extends wird in Prototype-Chain/Prototypenkette umgesetzt
   constructor(name, size, breed) {  //=Konstruktor; breed = Rasse
       super(name, size);        //super() statt call() <-- beim funktionsbasierten Ansatz
-      this.breed = breed;
-  }
+        this.breed = breed;
+    }
 
-  speak() { console.log(this.getName() + " sagt Wuff!"); }
+    speak() { console.log(this.getName() + " sagt Wuff!"); }
                       // '-> immer this verwenden!(, wenn man sich auf die Instanz bezieht); in Java: darf this weglassen 
 }
 
@@ -82,12 +82,12 @@ class Dog extends Animal {      //Klasse definieren & Vererbungshierarchie aufse
             //     ,-> in Java: muss feste Klasse sein 
             //     ,-> in JS: kann Funktion (=dynamisch), Plathalter, ... sein
 class Cat extends Animal {
-  constructor(name, size, color) {
-      super(name, size);
-      this.color = color;
-  }
+    constructor(name, size, color) {
+        super(name, size);
+        this.color = color;
+    }
 
-  speak() { console.log(this.getName() + " sagt Miau!"); }
+    speak() { console.log(this.getName() + " sagt Miau!"); }
 }
 
 /*alte Version:var*/let animal = new Animal("Tier", 5);
