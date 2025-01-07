@@ -96,4 +96,4 @@ animal = new Dog("Benno", 10, "Bulldogge");
 animal.speak(); // Benno sagt Wuff!
 animal = new Cat("Minki", 15, "Siamkatze");
 animal.speak(); // Minki sagt Miau!
-console.log(Animal.instanceCount); // 
+console.log(Animal.instanceCount); // 3
