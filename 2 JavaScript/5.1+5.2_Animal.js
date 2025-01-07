@@ -67,9 +67,10 @@ class Animal {  //Klasse Animal als Überklasse für Dog & Cat --> Dog & Cat erb
   static instanceCount = 0;
 }
 
+//          ,-> dadurch erben wir alles, was in Animal definiert ist (bekommt auch getName())
 class Dog extends Animal {      //Klasse definieren & Vererbungshierarchie aufsetzen; extends wird in Prototype-Chain/Prototypenkette umgesetzt
-  constructor(name, size, breed) {  //breed = Rasse
-      super(name, size);        //super() statt call()
+  constructor(name, size, breed) {  //=Konstruktor; breed = Rasse
+      super(name, size);        //super() statt call() <-- beim funktionsbasierten Ansatz
       this.breed = breed;
   }
 
