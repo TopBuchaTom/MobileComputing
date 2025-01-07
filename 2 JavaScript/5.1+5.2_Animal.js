@@ -94,4 +94,5 @@ class Cat extends Animal {
 console.log(animal.getName());
 animal = new Dog("Benno", 10, "Bulldogge");
 animal.speak(); // Benno sagt Wuff!
-a
+animal = new Cat("Minki", 15, "Siamkatze");
+animal.speak(); // Minki sagt Miau!
