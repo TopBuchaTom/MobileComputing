@@ -21,7 +21,8 @@ export class SettingsService {
   }
 
   getDefaultStarttab() {
-    return this._load(this._DEFAULT_STARTTAB_KEY, "news-page");
+    //vorher: return this._load(this._DEFAULT_STARTTAB_KEY, "news-page");
+    return this._load(this._DEFAULT_STARTTAB_KEY, "NewsPage");
   }
 
   setDefaultStarttab(defaultStarttab) {
