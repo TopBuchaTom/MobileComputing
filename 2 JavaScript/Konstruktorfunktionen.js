@@ -1,3 +1,4 @@
+/********** Aufgabe 4.6 **********/
 function Person(name, age, address) {
   if (this instanceof Person) {
       this.name = name;
@@ -13,7 +14,7 @@ function Address(street, town, pc) {
 }
 
 
-//Alte WebDev2 - von mir:
+//Altes WebDev2 - von mir:
 /********** Aufgabe 4.6 **********/
 function Address(description, town, postalcode) {
   this.description = description;
