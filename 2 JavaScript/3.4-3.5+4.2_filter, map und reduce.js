@@ -115,18 +115,19 @@ console.dir(result1);
 
 //damit kann man mit Einzeiler bestehende Daten transformieren in eine andere Form (potenziell mit wenigeren Informationen)
 //                              ,-> für jede Person im 
-//                              |     ,-> um {...} für das Objekt (...) herum machen, da wenn man {...} nach => macht, bedeutet das für JS, dass ein Block von Code mit mehreren Anweisungen kommt, das mit return endet
-//                              |     |   Wir wollen aber neues Objekt erzeugen --> über (...) macht man deutlich, dass das was kommt als ein Ausdruck/Wert zu interpretieren ist & nicht als Block von Code
-//                              |     |,-> innerhalb von {...} Übersetzung vornehmen; neues Objekt mir {...} definieren
+//                              |    ,-> um {...} für das Objekt (...) herum machen, da wenn man nur {...} nach => macht, bedeutet das für JS, dass ein Block von Code mit mehreren Anweisungen kommt, das mit return endet
+//                              |    |   Wir wollen aber neues Objekt erzeugen --> über (...) macht man deutlich, dass das was kommt als ein Ausdruck/Wert zu interpretieren ist & nicht als Block von Code
+//                              |    |                                                    '-> damit sagt man JS, dass das darin als Ausdruck/Ergebnis/Wert des Objekts zu Interpretieren ist --> es ist klar, dass die {...} danach ein Objekt einleiten
+//                              |    |,-> innerhalb von {...} Übersetzung vornehmen; neues Objekt mir {...} definieren
 const flatPersons = persons3.ma(x => ({  //<-- direkt neben => eine {, um Objekt direkt ad hoc anzugeben; ( vor {, da sonst JS meint es wäre Lambda-Ausdruck und man Fehler bekommt 
-                              // '-> für jede Person x im Ursprungsarray soll im Zielarray ein Objekt mit folgenden Aufbau landen:
+                              // '-> für jede Person x (p oder person wäre besser) im Ursprungsarray soll im Zielarray ein Objekt mit folgenden Aufbau landen:
   // ,-> name, der sich aus firstName & lastName zusammensetzt
-  name : x.firstName + " " + x.lastName,  //neues Objekt erhält Eigenschaft name, der berechnet wird, indem wir vom Ursprungsobjekt den Vornamen + " " + Nachnamen kombinieren  <-- geht schöner mit `...` = Back Ticks
+  name : x.firstName + " " + x.lastName,  //neues Objekt erhält Eigenschaft name, der berechnet wird, indem wir vom Ursprungsobjekt den Vornamen + " " + Nachnamen kombinieren  <-- geht schöner mit `...` = Back Ticks; name stezt sich zusammen aus: Vorname, Leerzeichen & Nachname
   //      '-> wenn man in JS in Objektliteral eine Variable angibt, dann wird diese automtisch expandiert als Variablenwert
-  birthday : new Date().getFullYear() - x.age,
+  birthday : new Date().getFullYear() - x.age,  //Geburtstag wird berechnet durch aktuelle Jahreszahl - Alter
             //         '-> damit ist es flexibler (kann auch 2023 schreiben)
             //         '-> = aktuelles Jahr
-  addresses : x.addresses.length
+  addresses : x.addresses.length  //Länge der bisherigen Andressen der personen-Objekte
 }));
 console.dir(flatPersons);
 
@@ -142,3 +143,13 @@ const personAlternativ = person.map(person => { //=Lambda-Ausdruck, der mehrzeil
 //return { name, birthday, address};
 })
 console.log(personAlternativ);
+
+//oder - Lösung von Student:
+let personX = [];
+function obj(person) {  //Funktion, die person entgegennimmt & dann konstruiert man neues Objekt; hat es wiederverwendbar ausgelagert als Funktion, die man dann bei map() angibt
+  return {name : person.firstName + " " + person.lastName,  //packt hier Objekt aus
+          birthday : new Date().getFullYear() - person.age,
+          address : person.address.length,
+         }  //Wenn man öfer so etwas braucht, dann Funktion schreiben
+}           //Wenn man es nur an einer Stelle im Code benötigt, dann ist es der etabilierte Ansatz, dass man es ad hoc über eine Arrow-Function macht, wie die obige Lösung; meist braucht man es nur 1x -> meist wird Arraw-Funktion-Methode genutzt
+console.log(person.map(obj))

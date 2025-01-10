@@ -1,84 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+    <head>
+    <meta charset="UTF-8">    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <script type="text/javascript">
         var $ = document.querySelectorAll.bind(document);   
+        //  '-> =Abkürzung für die Funktion: document.querySelectorAll, damit man nicht so viel tippen muss
 
-        class Person {
-            constructor(name = "", age = "") {
+        class Person {  //Klasse Person, der man name & age übergeben kann
+            constructor(name = ""/*vorher stand hier nur name*/, age = ""/*vorher stand hier nur age*/) {
                 this.id = (name && age) ? Person.counter++ : "";
-                this.name = name;
-                this.age = age;
+                this.name = name /*|| ""*/;
+                this.age = age /*|| "" stand vorher hier*/;
+                               // '-> kann name & age auch auf Leeren String setzen/leer lassen -> bekommt folgenden Datensatz: - Jahre [Bearbeiten] [Löschen]
+                               //     Grund: let selectedPerson = new Person(); --> am Anfang leere Person soll in Eingabefeld angezeigt werden
             }
 
             static counter = 1;
         }
 
-        let persons = [
-            new Person("Alex", 21),
+        let persons = [     //=Array von Personen / Gesamte Liste, die in <ul> ausgegeben wird/angezeigt werden sollen
+            new Person("Alex", 21),     //für jede Person soll ein <li>-Element - macht updateList() - erzeugt werden
             new Person("Chris", 19)
         ];
 
-        let selectedPerson = new Person();
+        let selectedPerson = new Person();  //=Varibale/Person-Instanz, die gerade in den Eingabefeldern bearbeitet wird / aktuell bearbeitete Person will man auch im Datenmodell haben
+                                            //am Anfang: selectedPerson/leere Person soll in Eingabefeld angezeigt werden/gerendert werden --> Eingabefelder sind leer
         
-        function updateList() {
-            $("#persons")[0].innerHTML = persons.map(person =>
+        function updateList() {     //hat durch nachfolgende 2 Einzeiler eine bidirektionale Synchronisation / two-way-data-binding
+            //1. UI auf Basis des Datenmodells aktualisieren:
+              // ,-> holt sich persons-Liste & ersetzt deren HTML durch das HTML, was sich ergibt, wenn man die persons-Array transformiert in HTML
+              // |                                ,-> für jede Person/Element/Datenobjekte/persons-Objekte im persons-Array ein HTML-Fragment/<li>-Element erzeugen --> bekommt zu jeder Person ein zugehöriges HTML
+            $("#persons")[0].innerHTML = persons.map(person =>      //mit Einzeilern komplett generisch durch Mapping
+         // '-> über $ Referenz von <ul>-Liste holen & dessen (<ul>-Element) komplettes HTML ersetzen
                 `<li>
                     ${person.name} - ${person.age} Jahre
                     [<a href="#" onclick="editItem(${person.id});">Bearbeiten</a>]
                     [<a href="#" onclick="deleteItem(${person.id})">Löschen</a>]
                 </li>`).join("");
+                       // '-> damit in Map erzeugten Strings zusammengejoint werden zu ganzen String, den man in HTML zuweist /
+                       //     bekommt gesamt-HTML, das man <ul>-Liste zuweist
 
-            Object.entries(selectedPerson).forEach(
+            //in Eingabefelder name & age die Daten der aktuellen selektierten Person (am Anfang: selectedPerson = leer) laden:
+            // ,-> sorgt dafür, dass in UI die Eingenschaften von aktuell selektierten Person stehen 
+            // |     ,-> für alle Eigenschaften in selectedPerson (=leeres Person-Objekt mit den Eigenschaften id, name & age) soll folgender Code aufgerufen werden ...
+           //  |     |                      ,-> vorher stand hier map
+            Object.entries(selectedPerson).forEach(     //oder: for-in-Schleife
+                                         // '-> über alle Eigenschaften (id, name & age) gehen
+                        // ,-> Wert von jeweiliger Eigenschaft
+                        // |    ,-> Lambda-Ausdruck
+                        // |    |   ,-> in UI Referenz auf genau das Eingabefeld zum zugehörigen Property (id, name & age) von selectedPerson holen / holt sich Refernz auf DOM-Element mit genau dieser Eigenschaft
+                        // |    |   |     ,-> Eingabefeld mit id name/age erhält genau den Wert, der in selectedPerson gespeichert ist
                 ([key, value]) => $(`#${key}`)[0].value = value);
+                  //'-> vorher stand hier name
+            //                     ... das Eingabefeld mit der ID, die dem Namen der Eigenschaft entspricht, soll den zugehörigen Wert erhalten / 
+            //                         für jede Eigenschaft name soll genau das Eingabefeld mit der ID name gesucht werden & das soll genau den Wert erhalte, der in der zugehörigen korrespondierenden Eigenschaft in selectedPerson gespeichert ist /
+            //                         über Einzeiler kann man durch Konvention in die Eingabefelder das reinladen, was im selectedPerson-Objekt in den zugehörigen Eigenschaften (name & alter) gespeichert ist
+            //                          --> name/age wird gemapped, weil Eingabefeld id=name/age hat -> Eingabefeld erhält Wert von name/age
+            //                          = UI aktualisieren auf Basis des Datenmodells
 
-            $("input[type='text']").forEach(
-                input => input.onchange = function() { selectedPerson[input.id] = input.value; });
+            //2. Wenn in UI etwas eingetippt wird, dann wird Datenmodell (selectedPerson) aktualisiert:
+            //Wenn User etwas in input-Felder/Eingabefelder eintippt, dann Datenmodell aktualisieren:
+            //                  ,-> für jedes Eingabefeld den onchange-Handler/EventListener anhängen
+            //                  |                           ,-> vorher stand hier map
+            /*Array.from(*/$("input[type='text']")/*)*/.forEach(     // ,-> wird zu x.name/age evaluiert
+                                                                     // |       ,-> Wert von zugehörigen Eingabefeld
+             // ,-> vorher stand hier x                                 |       |
+             input => input.onchange = function() { selectedPerson[input.id] = input.value; });
+                          // |                            '-> wenn User etwas eintippt in Eingabefeld name/age (id heißt so wie Eigenschaft), dann wir selecedPerson die Eigenschaft name/age geändert
+                          // '-> immer, wenn user etwas eintippt, dann im Datenmodell Property zur zugehörigen ID vom Eingabefeld setzen:
+                          //     wenn im Eingabefeld mit id=name/age etwas eingetippt wird, dann selectedPerson.name/age auf das setzen
         }
 
-        function saveItem() {
-            if (!selectedPerson.id) // Neues Item?
+        function saveItem() {   //eingegebenen Daten im Inputfeld speichern --> Array muss geändert werden
+            if (!selectedPerson.id) // Neues Item/Datensatz?
+                /*wenn neue Person, die mit Konstruktor erzeugt wurd, dann hat Person noch keine ID
+                   --> muss neue Person einfügen:       */
+                         // ,-> = Spreading
                 persons = [...persons, new Person(selectedPerson.name, selectedPerson.age)];
+                // '-> neues persons-Array = altes Array (einzelnen Elemente auspacken) + am Ende neue Person hinzufügen
             else // Existierendes Item?
+                /*hat Person, die schon ID hat, selektiert:
+                  --> im Array genau das Element ersetzen mit der ID von der selektierten Person durch neue selektierte Person ersetzen        */
                 persons[persons.findIndex(person => person.id == selectedPerson.id)] = selectedPerson;
            
-            selectedPerson = new Person();
+            selectedPerson = new Person();  //Eingabefelder leeren --> kann gleich neue Person einfügen
 
-            updateList();
+            updateList();   /* führt ... aus:
+                                Object.entries(selectedPerson).map(     //lädt in die Eingabefelder die Eigenschaften (name & age) in selektierte Person
+                                    ([name, value]) => $(`#${name}`)[0].value = value); */
         }
 
-        function createItem() {
-            selectedPerson = new Person();
+        function createItem() {  //soll Eingabefelder leeren
+            selectedPerson = new Person();  //setzt selectedPerson auf eine neue leere Person
 
             updateList();
         }
 
         function editItem(id) {
+            //selektierte Person muss die angeklickte Person sein:
             selectedPerson = persons.find(person => person.id == id);
+                            // '-> in persons-Array die Person mit angeklickter ID suchen
 
             updateList();
         }
 
         function deleteItem(id) {
             persons = persons.filter(person => person.id != id);
-            selectedPerson = new Person();
+                        // |    '-> bekommt Teilmenge, die die Kriterien erfüllen
+                        // '-> aus persons-Array die zu löschende Person herausfiltern --> neuesArray = altesArray - gelöschtePerson
+            selectedPerson = new Person();  //damit Eingabefelder wieder leer sind
 
-            updateList();
+            updateList();   //damit HTML in <ul> aktuell
         }
     </script>
 </head>
-<body onload="updateList();">   
+<body onload="updateList();">   <!-- updateList muss person-Array & selectedPerson in UI transformieren;
+                                     wenn DOM-Baum geladen, dann wird updateList() aufgerufen
+                                     updateList(): befülllt <ul>-Liste, damit alle Personen dargestellt sind, die im Array als Personen-Objekte -->
     <fieldset>
-        <input id="id" type="hidden" value="0" />
-        <label for="name">Name</label>: <input type="text" id="name" />
+        <input id="id" type="hidden" value="0" />  <!--vorher stand hier value=""-->
+        <label for="name">Name</label>: <input type="text" id="name" />   <!--Eingabefelder genauso benannt, wie die Eigenschaften im Objekt-->
         <label for="age">Alter</label>: <input type="text" id="age" />
-        <button onclick="saveItem();">Speichern</button>
+                                                 <!-- '-> besser: number -->
+        <button onclick="saveItem();">Speichern</button> <!--Button zum Speichern des aktuellen/neu anzulegenden Datensatzes-->
     </fieldset>
-    <ul id="persons"></ul>
+    <ul id="persons"><!--<li> <!--Liste, wo Personen ausgegeben werden sollen->
+                    Alex - 21 Jahre
+                    [<a href="#" onclick="editItem(1);">Bearbeiten</a>]     <!--Link um Element zum Bearbeiten->
+                    [<a href="#" onclick="deleteItem(1)">Löschen</a>]       <!--Link um Element zu Löschen->
+                </li><li>   <!--diese <li>-Elemente kann man eigentlich weglassen/werden von updateListe() geladen->
+                    Chris - 19 Jahre
+                    [<a href="#" onclick="editItem(2);">Bearbeiten</a>]     <!--für jedes Element/Person 2 Links->
+                    [<a href="#" onclick="deleteItem(2)">Löschen</a>]
+                </li><!--vorher stand hier etwas herin--></ul>
     <a href="#" onclick="createItem();">Neu</a>
 </body>
 </html>
+
+<!--
+Problem: Wenn im Datensatz nicht Name & Alter angegeben ist, dann kann man diesen Datensatz nicht bearbeiten/löschen
+
+
+=! perfekte Lösung in JS -> geht noch kürzer & eleganter
+
+
+nicht primitiv/einfach alles im DOM hard rein coden, sondern
+Datenmodell in JS haben:
+- für Liste von Personen soll es ... geben: class Person & Array von Instanzen dieser Klasse/Funktion
+- ...
+
+
+= klassicher Ansatz <-> besserer Ansatz: (muss man nicht können)
+will aber Data-Binding /
+will nicht immer manuell updateList() aufrufen = altmodisch
+'-> Lösung: Proxy-Ansatz nutzen:
+        let observer = (el) => {
+            return {
+                set: function(obj, prop, value) {
+                    if (el.tagName.toLowerCase().indexOf('input') != -1)
+                        el.value = value;
+                    obj[prop] = value;      //Eigenschaft auf neuen Wert setzen
+                    el.render();
+                }
+            };
+        }
+
+                                                        // ,-> = Handler/observer-Funktion, die Eigenschaft auf neuen Wert setzt & Eingabefeld synchronisiert -> braucht kein updateList() mehr 
+        let observer = (input, obj) => new Proxy(obj, observer(input));
+            // '-> observer-Funktion definieren, die das normale Objekt/Datenelement wrapped, sodass, wenn Wert sich ändert auto. das zugehörige Eingabefeld aktualisiert wird /
+            //     normales Person-Objekt/Array wird durch Proxy ersetzt
+
+
+würde kein globales HTML vewenden, sondern
+eigene HTML-Tags bauen, sodass Eingabefelder selbst eigene Logik haben:
+class DataInput extends HTMLElement {
+    root;
+    shadow;
+    observed;
+
+    constructor() {
+        super();
+
+        this.shadow = this.attachShadow({ mode: "closed"});
+        this.root = document.createElement('label');
+    }
+
+    connectedCallback() {
+        this.render();
+        this.shadow.appendChild(this.root);
+    }
+    
+    ...
+}
