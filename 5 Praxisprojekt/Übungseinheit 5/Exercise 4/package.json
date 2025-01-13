@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@ionic/core": "^8.2.6",
+    "hofuniversity-governmentapp": "file:",
     "ionicons": "^7.4.0",
     "lit": "^3.2.0"
   },

@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Document</title>
+      <template id="personTemplate">
+          <h1>
+              <slot name="name">Standard-Name</slot> ist <slot name="age">Standard-Alter</slot> Jahre alt! 
+          </h1>
+      </template>
+      <template id="simpleTemplate">
+          <p>Content vor Slot-Inhalt</p>
+          <slot></slot>
+          <p>Content nach Slot-Inhalt</p>
+      </template>
+      <script type="text/javascript">
+          //hatte er in seiner VL gezeigt:
+          class DataInput extends HTMLElement {
+              root;
+              shadow;
+
+              constructor() {
+                  super();
+
+                  this.shadow = this.attachShadow({ mode: "closed" });
+                  this.root = document.createElement('label');
+              }
+
+              connectedCallback() {
+                  this.render();
+                  this.shadow.appendChild(this.root);
+              }
+
+              render() {
+                  //Unterstützung der Bindung von Variablen der Form PropertyName bzw. Variable.PropertyName
+                  const boundVariable = this.getAttribute("value");
+                  const [name, prop] = boundVariable.split(".");
+                  let value = window[name]; if (prop) value = value[prop];
+
+                  this.root.innerHTML = `${this.getAttribute("label")}: <input value="${value}" onchange="${boundVariable}=this.value;" />`
+              }
+          }
+          customElements.define('data-input', DataInput);
+
+          class DataList extends HTMLElement {
+              root;
+              shadow;
+
+              constructor() {
+                  super();
+
+                  this.shadow = this.attachShadow({ mode: "closed" });
+                  this.root = document.createElement('label');
+              }
+
+              connectedCallback() {
+                  this.render();
+                  this.shadow.appendChild(this.root);
+              }
+
+              render() {
+                  const persons = window[this.getAttribute("value")];
+
+                  this.root.innerHTML = persons.map(person =>
+                    `<li>
+                        ${person.name} - ${person.age} Jahre
+                        [<a href="#" onclick="editItem(${person.id});">Bearbeiten</a>]
+                        [<a href="#" onclick="deleteItem(${person.id})">Löschen</a>]
+                    </li>`).join(""); 
+              }
+          }
+          customElements.define('data-list', DataList);
+
+          var $ = document.querySelectorAll.bind(document);
+
+          class Person {
+              constructor(name, age) {
+                  if(typeof(name) != "undefined" && typeof(age) != "undefined")
+                    this.id = Person.counter++; //Neues Objekt bekommt neue ID
+                  else
+                    this.id = ""; //Temporäres Objekt bekommt keine ID
+
+                this.name = name || "";
+                this.age = age || "";
+              }
+          }
+          Person.counter = 1;
+
+          // Muss hier var und nicht let sein, da Variable sonst zwar global ist,
+          // aber dem window-Objekt nicht hinzugefügt wird und damit in der
+          // DataList-Component Variable im value-Attribut nicht (ohne eval) über
+          // PropertyAccess window[] gelesen werden kann
+          var persons = [
+              new Person("Alex", 21),
+              new Person("Chris", 19)
+          ];
+
+          var selectedPerson = new Person();
+
+          function updateList() {
+            // Auf Aktualisierungen könnte verzichtet werden, wenn in DataList z.B. Zuweisung der
+            // gebundenen Variable durch Proxy-Objekt ersetzt wird, bei dem im Setter gemäß
+            // Observable-Pattern dann gebundene UI-Komponente aktualisiert wird
+            // Hier aber einfache Lösung
+
+            $("#persons")[0].render();
+          
+            $("#name")[0].render();
+            $("#age")[0].render();
+          }
+
+          function saveItem() {
+            if(!selectedPerson.id) // Neues Item?
+              persons = [...persons, new Person(selectedPerson.name, selectedPerson.age)];
+            else
+              persons[persons.findIndex(person => person.id == selectedPerson.id)] = selectedPerson;
+
+            selectedPerson = new Person();
+
+            updateList();
+          }
+
+          function createItem() {
+              selectedPerson = new Person();
+              
+              updateList();
+          }
+
+          function editItem(id) {
+              selectedPerson = persons.find(person => person.id == id);
+              updateList();
+          }
+
+          function deleteItem(id) {
+              persons = persons.filter(person => person.id != id);
+              selectedPerson = new Person();
+
+              updateList();
+          }
+      </script>
+    </head>
+  <body>
+    <fieldset>
+      <data-input id="name" label="Name" value="selectedPerson.name"></data-input>
+      <!--                                                     '-> Attribute von neuen Komponenten findet er nicht, aber später wenn wir best. Framework nutzen, dann funktioniert es, da es dazu eine best. Erweiterung gibt-->
+      <data-input id="age" label="Alter" value="selectedPerson.age"></data-input>
+      <button onclick="saveItem()">Speichern</button>
+    </fieldset>
+    <data-list id="persons" value="persons" onEdit="editItem" onDelete="deleteItem"></data-list>
+    <a href="#" onclick="createItem();">Neu</a>
+  </body>
+</html>
+
+
+<!--
+= besser als Lösung von 2 Javascript, Übung 5.12
+-->

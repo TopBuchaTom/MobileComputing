@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript">
+      var $ = document.querySelectorAll.bind(document);
+
+      const indexView = () => `
+          <h1>Index view</h1>
+          <a href="/list">List</a>
+          <a href="/details">Details</a>
+      `;
+
+      const detailsView = () => `
+          <h1>Details view</h1>
+          <a href="/">Index</a>
+      `;
+
+      const listView = () => `
+          <h1>List view</h1>
+          <a href="/">Index</a>
+      `;
+
+      const routes = {};
+      const route = (path, template) => routes[path] = template();
+      const router = url => {
+        $('#root')[0].innerHTML = routes[url];
+
+        $("a").forEach(
+          link => link.onclick= () => router(link.getAttribute("href")));
+
+        return false;
+      };
+
+      route('/', indexView);
+      route('/list', listView);
+      route('/details', detailsView);
+      window.onload = x => router("/");
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
+<!--
+in VL: S. 54-56
+-->

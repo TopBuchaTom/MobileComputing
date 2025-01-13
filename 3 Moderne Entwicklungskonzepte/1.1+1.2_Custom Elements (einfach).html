@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <template id="personTemplate">
+        <h1>
+            <slot name="name">Standard-Name</slot> ist <slot name="age">Standard-Alter</slot> Jahre alt! 
+        </h1>
+    </template>
+    <template id="simpleTemplate">
+        <p>Content vor Slot-Inhalt</p>
+        <slot></slot>
+        <p>Content nach Slot-Inhalt</p>
+    </template>
+    <script type="text/javascript">
+        class LabelWithInput extends HTMLElement {
+            root;   //macht hier nur bekannt, dass es diese Eigenschaften/Membervariablen gibt; kann man auch weglassen, aber hat sich bewährt
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.createElement('label');    //Wurzelelement für unsere neue Komponente
+                //this.shadow.appendChild(this.root);   kann auch hier root in den shadow packen
+                //                                      aber Zugriffe, wie .getAttribut funktionieren nur gesichert im connectedCallback()
+                //                                                                                                          '-> erst zu dem Lebenszyklus/Moment, wenn Element in DOm eingehängt ist, & Attribute vom Browser/Engine geparst wurden, erst dann können die Zugriffe erfolgreich durchgeführt werden
+            }
+
+            connectedCallback() {
+                this.render();
+                //Seine Idee/Gedanke: erst Teilbaum bauen (render()) & diesen dann dem shadow hinzufügen (Hintergrund: damit nicht irgendwelche Browserinternen Events feuern & um die Performance zu optimieren)
+                this.shadow.appendChild(this.root); //fügt root und damit alle Kind-Elemente und Kind-Kind-Kind-Elemente dem shadow hinzu (root kann selbst Kindelemente habe mit .appendChild & diese können wieder Kinder haben)
+                //                                    --> versteckt ganzen Teilbaum (Wurzel & alles, was darunter ist) im Schatten
+                //                                    --> wenn jemand von außen auf diese Komponente geht, dann sieht er nur noch den Schatten (und nicht mehr root & seine Kind-Kind-Kind-Elemente) 
+            }
+
+            render() {
+                //normalerweise arbeitet man nicht mit innerHTML, v. a. wenn es eine sehr tiefe Verschachtelung ist
+                //--> würde über .createElement die einzelnen Tags erzeugen, denen Werte zuweisen & diese inneinander verschachteln
+                //    let b = document.createElement('button'); //= mehr Tipp-Arbeit, aber schöner
+                //    b.onclick(Funktion zuweisen);
+                //    this.root.appendChild(b);
+                //später: wir lernen Framework kennen, wo wir nur noch einen String erzeugen & das Framework das drum herum macht
+                this.root.innerHTML = `${this.getAttribute("label")}: <input value="${this.getAttribute("value")}" />`;
+                //                                                      '-> HTML innerhalb von JS wird nicht gesyntaxed-Highlighted
+                //                                                          Nur bei html`...` funktioniert Syntax-Highlighting
+                //                                                      '-> kann nicht mehr in das Innere reingreifen, wenn man das ganze in den shadow schiebt
+                //                                                          --> kann von außen nicht irgendwie eingreifen und das input-Feld ersetzen/ändern
+                //                                                          --> stellt gewisse Isolation her, sodass Komponente als eigenständige Einheit nach außen agiert
+                //                                                          --> Komponente <label-with-input> wirkt wie aus einem Guss, wie <h1>, <p>, <input>, ...
+            }
+        }
+        customElements.define('label-with-input', LabelWithInput);
+
+        class PersonOutput extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.getElementById("personTemplate").content.cloneNode(true);
+            }
+
+            connectedCallback() {
+                this.shadow.appendChild(this.root);
+            }
+        }
+        customElements.define('person-output', PersonOutput);
+
+        class SimpleTemplate extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.getElementById("simpleTemplate").content.cloneNode(true);
+            }
+
+            connectedCallback() {
+                this.shadow.appendChild(this.root);
+            }
+        }
+        customElements.define('simple-output', SimpleTemplate);
+
+
+        /************** Aufgabe 1.1: **************/
+        //             ,-> leitet von ... ab
+        class DataRepeater extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });    //Schatten &
+                this.root = document.createElement('div');              //           root werden angelegt (für später)
+                //console.log("Hello");   //zum Nachvollziehen
+            }
+
+            connectedCallback() {
+                this.render();  //kann den Code von render() auch hier machen
+                                //in den Frameworks gibt es meist render()-Methode, deshalb hat er es hier auch so gemacht
+                this.shadow.appendChild(this.root);
+                //console.log("World");   //zum Nachvollziehen
+            }
+
+            render() {  //                              ,-> Wenn das Attribut data nicht gesetzt wurde, dann ""/leer-String verwenden (ohne dies würde man undefined bekommen)
+                const data = this.getAttribute("data") || "";   //holt sich aus data-Attribut den Text raus, der übergeben wurde
+                //oder:                                 '-> macht noch Konvertierungen
+                //const data = this.getAttribute("data") ?? ""; //=Elvis-Operator = moderner, konvertiert Daten nicht
+                const count = parseInt(this.getAttribute("count")); //Wert von count-Attribut auslesen & in Ganzzahl umwandeln
+                //oder:
+                //const count = +this.getAttribute("count");
+                this.root.innerHTML = data.repeat(count);   //der String, der in data steht, soll so oft wiederholt werden, wie es in count angegeben ist
+                //                          '-> durch repeat()-Methode von String bekommt man neuen Gesamtstring, wo der jeweilige Ursprungsstring "Hello Word!" so oft hintereinander steht, wie es angegeben ist
+                //                          '-> statt repeat() kann man auch Schleife nutzen: for-Schleife und bis count hochzählen; data += ...; data muss let sein (nicht const) = ineffizienter
+            }
+
+            //braucht man für Aufgabe 1.2:
+            //      ,-> = Eigenschaft, die ich über JS ansprechen kann
+            //      |                                   ,-> Attribut = das, was man im HTML direkt im Markup angeben kann
+            get count() { return parseInt(this.getAttribute("count") || 0); }   //Komnponente ist nach außen nur über Eigenschaften zugreifbar, die wir explizit so angeben
+            //                     '-> 1. = Code, der auch 2 Zeilen darüber wieder vorkommt => hätte man deutlich schöner schreiben/vereinheitlichen/optimieren können
+            //                            besser: get & set auch oben/im inneren nutzen
+            set count(value) { this.setAttribute("count", value); }
+            //                       '-> setzt/ändert das gleichnahmige Attribut auf den übergebenen Wert
+        }
+        customElements.define('data-repeater', DataRepeater);
+
+        /************** Aufgabe 1.2: **************/
+        class DataRepeaterIncrementer extends HTMLElement {
+            root;
+            shadow;
+
+            constructor() {
+                super();
+
+                this.shadow = this.attachShadow({ mode: "closed" });
+                this.root = document.createElement('div');  //2. statt div kann man hier gleich button machen,
+                //                                               dann müsste man aber onclick bei this.root von render() registrieren und nicht im HTML,
+                //                                               da Frameworks, die wir dann verwenden, keine Zuweisung an Elemente (& damit auch kein onclick() ermöglichen würden) erlauben,
+                //                                               sondern immer ein ganzes HTML angeben
+                //                                            Aber er hat es mit div gemacht, da es ähnlicher zum Framework ist --> kann es leichter übersetzen in die neue Welt
+            }
+
+            connectedCallback() {
+                this.render();
+                this.shadow.appendChild(this.root);
+            }   //erste Teil vom Code ist immer das gleiche
+
+            render() {  //rendert innerhalb von div-Element einen Button                                                                          ,-> zuerst wird Getter aufgerufen -> liefert aktuellen Wert von count, dann wird Setter count(aktueller Wert von count+1) ausgeführt & das Ergebnis wieder in count gespeichert => render-Methode vom repeater wird danach aufgerufen, die sich die aktuellen Werte von data & count holt -> neu gespeicherte Wert von count wird im HTML gesetzt & damit wird es in der angegebenen Anzahl ausgegeben
+                //                                                                                                                                |             ,-> 3. im Code render() aufrufen = schlecht => besser: render() bei set aufrufen: bei jedem set-Aufruf/bei jeder Änderung wird es auto. neu gerendert   oder: observed-Properties-Attribut: damit wird auto. bei Attributänderung connecedCallback() aufgerufen, in der render() aufgerufen werden kann
+                this.root.innerHTML = `<button onclick="let repeater=document.getElementById('${this.getAttribute("repeaterid")}'); repeater.count++;repeater.render();">Inkrementieren</button>`;
+                //                                '-> Was soll passieren, wenn Button geklickt wird?                '-> Verweis auf das HTML-Element mit der ID, die wir im Attribut festgelegt haben (repeater1)
+                /*kann es noch kürzer machen/=deutlich bessere Lösung; setzt aber voraus, dass man bei root button und kein div macht --> root = button & .innerHTML ist die Beschriftung vom Button:
+                render() {
+                    const repeater = document.getElementById(this.getAttribut("repeatid")); //repeater suchen
+                    this.root.innerHTML = "increase";   //Buttonbeschriftung als innerHTML festlegen
+                    this.root.addEventListener("click", function(){repeater.increaseCount()})   //root click-Listner hinzufügen
+                }   */
+               //Wir haben es so ähnlich gemacht, wie die Frameworks auch, wo wir keine Elemente zusammenbaut,
+               //sondern ein gesamt HTML erzeugt, dass dann returned wird
+            }
+        }
+        customElements.define('data-repeater-incrementer', DataRepeaterIncrementer);    //eigene Klasse DataRepeaterIncrementer, die man unter dem Tag <data-repeater-incrementer> bekannt macht
+    </script>
+    <!--alte Version: <style type="text/css" id="tts-styles">[data-tts-block-id].tts-active {background: rgba(206, 225, 255, 0.9) !important;} [data-tts-sentence-id].tts-active {background: rgba(0, 89, 191, 0.7) !important;}</style>-->
+</head>
+<body>
+    <!--vorteilhaft, wenn man das HTML gemäß Aufgabenstellung schon einfügt/wenn man mit HTML startet (-> ist deutlich einfacher), weil man dann testen kann, ob es funktioniert & meine Implementierung wird aufgerufen-->
+    <label-with-input label="Hello" value="World"><!--alte Version: <template shadowrootmode="closed"><label>Hello: <input value="World"></label></template>--></label-with-input>
+    <person-output>
+        <!--alte Version:
+        <template shadowrootmode="closed">
+            <h1>
+                <slot name="name">Standard-Name</slot> ist <slot name="age">Standard-Alter</slot> Jahre alt! 
+            </h1>
+        </template>
+        -->
+        <data slot="name">Max</data>
+        <data slot="age">21</data>
+    </person-output>
+    <simple-output>
+        <!--alte Version:
+        <template shadowrootmode="closed">
+            <p>Content vor Slot-Inhalt</p>
+            <slot></slot>
+            <p>Content nach Slot-Inhalt</p>
+        </template>
+        -->
+        <p>Beliebiger <b>HTML-Content</b></p>
+    </simple-output>
+    <!--Aufgabe 1.1:-->
+    <data-repeater id="repeater1" data="Hello World!" count="10"><!--alte Version: <template shadowrootmode="closed"><div>Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!</div></template>--></data-repeater>
+    <!--Aufgabe 1.2: <-'  '-> einfach irgendeine id vergeben -> kann ihn damit suchen anhand der id innerhalb von <data-repeater-incrementer>       -->
+    <data-repeater-incrementer repeaterid="repeater1"><!--alte Version: <template shadowrootmode="closed"><div><button onclick="let repeater=document.getElementById(&#39;repeater1&#39;); repeater.count++;repeater.render();">Inkrementieren</button></div></template>--></data-repeater-incrementer>
+</body>
+</html>
+
+
+<!--
+Ab dem Praxisprojekt steigen wir auf Framework um, das sehr nahe am Standard ist
+                                        '-> dafür gibt es für die Entwicklungsumgebung eine Erweiterung, wodurch man alle Vorteile hat
+Wir sind möglichst nah an dem Framework, dass wir dann später einsetzen werden
+
+Wir lernen deutlich einfacheren Ansatz kennen, dann müssen wir das alles nicht machen:
+- kein shadow, kein root; keine Zuweisung an root
+- nur noch render()-Funktion; nur noch HTML zurückgeben
+=> Aber das hier ist die Basis von allem/das hier sind die Grundpfeiler
+
+Allgemein ist es eine Empfehlung eine render()-Methode zu machen
+In den meisten Frameworks implementiert man nur noch render() & diese wird auto. vom Framework über connectedCallback() aufgerufen
+                                                                                                            '-> kann man auch von außen aufrufen
+-->

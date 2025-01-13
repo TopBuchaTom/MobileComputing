@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <template id="indexView">
+    <h1>Index view</h1>
+    <a href="/list">List</a>
+    <a href="/details">Details</a>
+  </template>
+  <template id="detailsView">
+    <h1>Details view</h1>
+    <a href="/">Index</a>
+    </template>
+  <template id="listView">
+    <h1>List view</h1>
+    <a href="/">Index</a>
+  </template>
+  <script type="text/javascript">
+      var $ = document.querySelectorAll.bind(document);
+
+      // Alternative Definition über Templates
+      let implexView = () => document.getElementById("indexView").content.cloneNode(true);
+      let detailsView = () => document.getElementById("detailsView").content.cloneNode(true);
+      let listView = () => document.getElementById("listView").content.cloneNode(true);
+      
+      let routes = {};
+      let route= (path, template) => routes [path] = template();
+      let router = url => {
+        //$('#root')[0].innerHTML = routes[url].innerHTML;  // Document Fragment besitzt keine innerHTML-Eigenschaft
+        $('#root')[0].innerHTML = Array.from(routes[url].childNodes).map(node => node.outerHTML).join(" ");
+      }
+    </script>
+    <body>
+      
+    </body>
