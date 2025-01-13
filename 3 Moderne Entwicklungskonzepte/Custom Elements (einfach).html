@@ -73,21 +73,27 @@
             constructor() {
                 super();
 
-                this.shadow = this.attachShadow({ mode: "closed" });
-                this.root = document.createElement('div');
+                this.shadow = this.attachShadow({ mode: "closed" });    //Schatten &
+                this.root = document.createElement('div');              //           root werden angelegt (für später)
             }
 
             connectedCallback() {
-                this.render();
+                this.render();  //kann den Code von render() auch hier machen
+                                //in den Frameworks gibt es meist render()-Methode, deshalb hat er es hier auch so gemacht
                 this.shadow.appendChild(this.root);
             }
 
             render() {
-                const data = this.getAttribute("data") || "";
-                const count = parseInt(this.getAttribute("count"));
-                this.root.innerHTML = data.repeat(count);
+                const data = this.getAttribute("data") || "";   //holt sich aus data-Attribut den Text raus, der übergeben wurde
+                const count = parseInt(this.getAttribute("count")); //Wert von count-Attribut auslesen & in Ganzzahl umwandeln
+                //oder:
+                //const count = +this.getAttribute("count");
+                this.root.innerHTML = data.repeat(count);   //der String, der in data steht, soll so oft wiederholt werden, wie es in count angegeben ist
+                //                          '-> durch repeat()-Methode von String bekommt man neuen Gesamtstring, wo der jeweilige Ursprungsstring "Hello Word!" so oft hintereinander steht, wie es angegeben ist
+                //                          '-> statt repeat() kann man auch Schleife nutzen: for-Schleife und bis count hochzählen; data += ...; data muss let sein (nicht const) = ineffizienter
             }
 
+            //braucht man für Aufgabe
             get count() { return parseInt(this.getAttribute("count") || 0); }
             set count(value) { this.setAttribute("count", value); }
         }
